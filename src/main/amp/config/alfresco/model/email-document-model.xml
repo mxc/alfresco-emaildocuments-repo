@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model name="jb:emaildocumentmodel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+    <!-- Optional meta-data about the model -->
+    <description>Jumping Bean Email Documents Content Model</description>
+    <author>Mark Clarke</author>
+    <version>1.0</version>
+
+    <!-- Imports are required to allow references to definitions in other models -->
+    <imports>
+        <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+        <import uri="http://www.alfresco.org/model/datalist/1.0" prefix="dl"/>        
+    </imports>
+
+    <!-- Introduction of new namespaces defined by this model -->
+    <namespaces>
+        <namespace uri="http://www.jumpingbean.co.za/model/content/1.0" prefix="jb" />
+    </namespaces>
+    
+    <types>
+        <type name="jb:emailHistoryList">
+            <title>Email History List</title>
+            <parent>dl:dataListItem</parent>
+            <properties>
+                <property name="jb:attachment">
+                    <type>d:text</type>
+                </property>
+                <property name="jb:dateSent">
+                    <type>d:date</type>
+                </property>
+            </properties>
+            <mandatory-aspects>
+                <aspect>jb:emailTemplate</aspect>
+            </mandatory-aspects>   
+        </type>
+    </types>
+    
+    
+    <aspects>
+        <aspect name="jb:emailTemplate">
+            <title>Someco Webable</title>
+            <properties>
+                <property name="jb:to">
+                    <type>d:text</type>
+                    <mandatory enforced='true'>true</mandatory>
+                </property>
+                <property name="jb:from">
+                    <type>d:text</type>
+                    <mandatory enforced='true'>true</mandatory>
+                </property>
+                <property name="jb:subject">
+                    <type>d:text</type>
+                    <mandatory enforced='true'>true</mandatory>
+                </property>
+                <property name="jb:body">
+                    <type>d:text</type>
+                    <mandatory enforced='true'>true</mandatory>
+                </property>
+            </properties>
+        </aspect>
+    </aspects>
+    
+</model>
