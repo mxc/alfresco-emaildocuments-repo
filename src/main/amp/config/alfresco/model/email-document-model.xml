@@ -38,23 +38,19 @@
     
     <aspects>
         <aspect name="jb:emailTemplate">
-            <title>Someco Webable</title>
+            <title>Email Template</title>
             <properties>
                 <property name="jb:to">
                     <type>d:text</type>
-                    <mandatory enforced='true'>true</mandatory>
                 </property>
                 <property name="jb:from">
                     <type>d:text</type>
-                    <mandatory enforced='true'>true</mandatory>
                 </property>
                 <property name="jb:subject">
                     <type>d:text</type>
-                    <mandatory enforced='true'>true</mandatory>
                 </property>
                 <property name="jb:body">
                     <type>d:text</type>
-                    <mandatory enforced='true'>true</mandatory>
                 </property>
             </properties>
         </aspect>

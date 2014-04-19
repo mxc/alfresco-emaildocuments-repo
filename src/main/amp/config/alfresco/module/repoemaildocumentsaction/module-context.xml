@@ -4,7 +4,7 @@
 
 <beans>
 
-    <import resource="classpath:alfresco/module/${project.artifactId}/context/service-context.xml" />
+    <import resource="classpath:alfresco/module/repoemaildocumentsaction/context/service-context.xml" />
 
         
 </beans>
