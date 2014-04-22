@@ -25,7 +25,7 @@ import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.tagging.TaggingService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
-import static za.co.jumpingbean.alfresco.repo.EmailDocumentsAction.PARAM_TEXT;
+import static za.co.jumpingbean.alfresco.repo.EmailDocumentsAction.PARAM_BODY;
 
 /**
  *
@@ -59,7 +59,7 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
             contentProps.put(ContentModel.PROP_TITLE, DATALIST_NAME);
             contentProps.put(ContentModel.PROP_DESCRIPTION, DATALIST_DESCRIPTION);
             contentProps.put(DataListModel.PROP_DATALIST_ITEM_TYPE,
-                    EmailHistoryListModel.TYPE_EMAIL_DOCUMENT_ITEM);
+                    EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM);
 
             list = nodeService.createNode(dataListContainer, ContentModel.ASSOC_CONTAINS,
                     QName.createQName(DataListModel.DATALIST_MODEL_PREFIX, DATALIST_NAME),
@@ -68,15 +68,17 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
         }
 
         Map<QName, Serializable> contentProps = new HashMap<>();
-        contentProps.put(EmailHistoryListModel.FROM, action.getParameterValue(PARAM_FROM));
-        contentProps.put(EmailHistoryListModel.TO,action.getParameterValue(PARAM_TO));
-        contentProps.put(EmailHistoryListModel.SUBJECT,action.getParameterValue(PARAM_SUBJECT));
-        contentProps.put(EmailHistoryListModel.BODY,action.getParameterValue(PARAM_TEXT));
-        contentProps.put(EmailHistoryListModel.ATTACHMENT,attachmentName);
-        contentProps.put(EmailHistoryListModel.DATESENT,new Date());
+        contentProps.put(EmailDocumentsAction.FROM, action.getParameterValue(PARAM_FROM));
+        contentProps.put(EmailDocumentsAction.TO,action.getParameterValue(PARAM_TO));
+        contentProps.put(EmailDocumentsAction.SUBJECT,action.getParameterValue(PARAM_SUBJECT));
+        contentProps.put(EmailDocumentsAction.BODY,action.getParameterValue(PARAM_BODY));
+        contentProps.put(EmailDocumentsAction.ATTACHMENT,attachmentName);
+        contentProps.put(EmailDocumentsAction.DATESENT,new Date());
+        contentProps.put(EmailDocumentsAction.CONVERT,action.getParameterValue(PARAM_CONVERT));
+
         ChildAssociationRef ref = nodeService.createNode(list, ContentModel.ASSOC_CONTAINS,
                 DataListModel.TYPE_DATALIST_ITEM,
-                EmailHistoryListModel.TYPE_EMAIL_DOCUMENT_ITEM, contentProps);
+                EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM, contentProps);
     }
 
     @Override

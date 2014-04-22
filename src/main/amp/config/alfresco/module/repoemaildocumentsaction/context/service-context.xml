@@ -31,6 +31,9 @@
         <property name="fileFolderService">
             <ref bean="FileFolderService" />
         </property>
+        <property name="contentService">
+            <ref bean="ContentService" />
+        </property>
     </bean>   
     
     <bean id="emailDocumentsWithHistoryAction"
@@ -49,6 +52,9 @@
         </property>
         <property name="siteService">
             <ref bean="siteService" />
+        </property>
+        <property name="contentService">
+            <ref bean="ContentService" />
         </property>
     </bean>   
 

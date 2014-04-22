@@ -28,6 +28,9 @@
                 <property name="jb:dateSent">
                     <type>d:date</type>
                 </property>
+                <property name="jb:to">
+                    <type>d:text</type>
+                </property>
             </properties>
             <mandatory-aspects>
                 <aspect>jb:emailTemplate</aspect>
@@ -40,9 +43,6 @@
         <aspect name="jb:emailTemplate">
             <title>Email Template</title>
             <properties>
-                <property name="jb:to">
-                    <type>d:text</type>
-                </property>
                 <property name="jb:from">
                     <type>d:text</type>
                 </property>
@@ -51,6 +51,9 @@
                 </property>
                 <property name="jb:body">
                     <type>d:text</type>
+                </property>
+                <property name="jb:convertToPDF">
+                    <type>d:boolean</type>
                 </property>
             </properties>
         </aspect>

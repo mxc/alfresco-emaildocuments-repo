@@ -132,7 +132,8 @@ public class EmailDocumentsTest {
             params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
             params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test");
-            params.put(EmailDocumentsAction.PARAM_TEXT, "Test Body");
+            params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
+            params.put(EmailDocumentsAction.PARAM_CONVERT,true);
             Action action = serviceRegistry.getActionService().createAction("emailDocumentsAction", params);
             serviceRegistry.getActionService().executeAction(action, this.file2);
             Assert.assertTrue("Email sent successfully", true);
@@ -151,7 +152,8 @@ public class EmailDocumentsTest {
             params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
             params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Folder Send Test");
-            params.put(EmailDocumentsAction.PARAM_TEXT, "Test Body");
+            params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
+            params.put(EmailDocumentsAction.PARAM_CONVERT,true);
             Action action = serviceRegistry.getActionService().createAction("emailDocumentsAction", params);
             serviceRegistry.getActionService().executeAction(action, this.nodeRef);
             Assert.assertTrue("Folder contents sent successfully", true);
