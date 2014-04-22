@@ -52,7 +52,7 @@
                 <property name="jb:body">
                     <type>d:text</type>
                 </property>
-                <property name="jb:convertToPDF">
+                <property name="jb:convert">
                     <type>d:boolean</type>
                 </property>
             </properties>

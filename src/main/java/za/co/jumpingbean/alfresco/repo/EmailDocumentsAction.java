@@ -51,7 +51,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
     public static final String PARAM_SUBJECT = "subject";
     public static final String PARAM_BODY = "body";
     public static final String PARAM_FROM = "from";
-    public static final String PARAM_CONVERT = "convertToPDF";
+    public static final String PARAM_CONVERT = "convert";
     public static final String PARAM_ATTACHMENT = "attachement";
 
     public static final String URI = "http://www.jumpingbean.co.za/model/content/1.0";

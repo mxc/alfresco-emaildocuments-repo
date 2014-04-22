@@ -85,6 +85,7 @@ public class EmailDocumentsTest {
     private final static String ID = GUID.generate();
     private NodeRef file2;
     private NodeRef file1;
+    private NodeRef file3;
     private NodeRef shadowFolder;
 
     @Before
@@ -115,17 +116,25 @@ public class EmailDocumentsTest {
         writer.putContent(file);
 
         this.file2 = this.nodeService.createNode(nodeRef,ContentModel.ASSOC_CONTAINS,
-                QName.createQName("{test}file1"),ContentModel.TYPE_CONTENT ).getChildRef();
+                QName.createQName("{test}file2"),ContentModel.TYPE_CONTENT ).getChildRef();
         writer = contentService.getWriter(file2,
                 ContentModel.PROP_CONTENT, true);
         file = this.getClass().getClassLoader().getResourceAsStream("newton.jpg");
         writer.setMimetype("image/jpg");
         writer.putContent(file);
+
+        this.file3 = this.nodeService.createNode(nodeRef,ContentModel.ASSOC_CONTAINS,
+                QName.createQName("{test}file3"),ContentModel.TYPE_CONTENT ).getChildRef();
+        writer = contentService.getWriter(file3,
+                ContentModel.PROP_CONTENT, true);
+        file = this.getClass().getClassLoader().getResourceAsStream("JumpingBeanLetterhead.odt");
+        writer.setMimetype("application/vnd.oasis.opendocument.text");
+        writer.putContent(file);        
         
     }
 
     @Test
-    public void testEmailDocumentsActionFile() {
+    public void testEmailDocumentsActionFileImage() {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
@@ -142,7 +151,23 @@ public class EmailDocumentsTest {
         }
     }
     
-    
+    @Test
+    public void testEmailDocumentsActionFileWriter() {
+        try {
+            AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
+            Map<String, Serializable> params = new HashMap<>();
+            params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
+            params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
+            params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test");
+            params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
+            params.put(EmailDocumentsAction.PARAM_CONVERT,true);
+            Action action = serviceRegistry.getActionService().createAction("emailDocumentsAction", params);
+            serviceRegistry.getActionService().executeAction(action, this.file3);
+            Assert.assertTrue("Email sent successfully", true);
+        } catch (Exception ex) {
+            Assert.assertTrue("Failed to send email ", false);
+        }
+    }    
     
     @Test
     public void testEmailDocumentsActionFolder() {
