@@ -13,18 +13,15 @@ import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.model.DataListModel;
 import org.alfresco.repo.action.ParameterDefinitionImpl;
-import org.alfresco.repo.site.SiteServiceImpl;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
-import org.alfresco.service.cmr.tagging.TaggingService;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.service.transaction.TransactionService;
+import org.apache.log4j.Logger;
 import static za.co.jumpingbean.alfresco.repo.EmailDocumentsAction.PARAM_BODY;
 
 /**
@@ -39,46 +36,53 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
     private final Serializable DATALIST_DESCRIPTION = "Archive of document emails";
 
     private SiteService siteService;
-
+    private static final Logger logger = Logger.getLogger(EmailDocumentsWithHistoryAction.class);
+    
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
-        super.executeImpl(action, nodeRef);
-        String siteName = (String) action.getParameterValue(PARAM_SITE);
-        SiteInfo siteInfo = siteService.getSite(siteName);
-        String shortName = siteInfo.getShortName();
+        try {
+            super.executeImpl(action, nodeRef);
+            String siteName = (String) action.getParameterValue(PARAM_SITE);
+            SiteInfo siteInfo = siteService.getSite(siteName);
+            String shortName = siteInfo.getShortName();
         //Get site datalist container or create the data list container if it does not
-        //exist.
-        NodeRef dataListContainer = siteService.getContainer(shortName, DATALIST_CONTAINER);
-        if (dataListContainer == null) {
-            dataListContainer = siteService.createContainer(shortName, DATALIST_CONTAINER, ContentModel.TYPE_FOLDER, null);
-        }
+            //exist.
+            NodeRef dataListContainer = siteService.getContainer(shortName, DATALIST_CONTAINER);
+            if (dataListContainer == null) {
+                dataListContainer = siteService.createContainer(shortName, DATALIST_CONTAINER, ContentModel.TYPE_FOLDER, null);
+            }
 
-        NodeRef list = nodeService.getChildByName(dataListContainer, ContentModel.ASSOC_CONTAINS, DATALIST_NAME);
-        if (list == null) {
+            NodeRef list = nodeService.getChildByName(dataListContainer, ContentModel.ASSOC_CONTAINS, DATALIST_NAME);
+            if (list == null) {
+                Map<QName, Serializable> contentProps = new HashMap<>();
+                contentProps.put(ContentModel.PROP_TITLE, DATALIST_NAME);
+                contentProps.put(ContentModel.PROP_DESCRIPTION, DATALIST_DESCRIPTION);
+                contentProps.put(DataListModel.PROP_DATALIST_ITEM_TYPE,
+                        EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM);
+
+                list = nodeService.createNode(dataListContainer, ContentModel.ASSOC_CONTAINS,
+                        QName.createQName(DataListModel.DATALIST_MODEL_PREFIX, DATALIST_NAME),
+                        DataListModel.TYPE_DATALIST, contentProps).getChildRef();
+
+            }
+
             Map<QName, Serializable> contentProps = new HashMap<>();
-            contentProps.put(ContentModel.PROP_TITLE, DATALIST_NAME);
-            contentProps.put(ContentModel.PROP_DESCRIPTION, DATALIST_DESCRIPTION);
-            contentProps.put(DataListModel.PROP_DATALIST_ITEM_TYPE,
-                    EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM);
+            contentProps.put(EmailDocumentsAction.FROM, action.getParameterValue(PARAM_FROM));
+            contentProps.put(EmailDocumentsAction.TO, action.getParameterValue(PARAM_TO));
+            contentProps.put(EmailDocumentsAction.SUBJECT, action.getParameterValue(PARAM_SUBJECT));
+            contentProps.put(EmailDocumentsAction.BODY, action.getParameterValue(PARAM_BODY));
+            contentProps.put(EmailDocumentsAction.ATTACHMENT, attachmentName);
+            contentProps.put(EmailDocumentsAction.DATESENT, new Date());
+            contentProps.put(EmailDocumentsAction.CONVERT, action.getParameterValue(PARAM_CONVERT));
 
-            list = nodeService.createNode(dataListContainer, ContentModel.ASSOC_CONTAINS,
-                    QName.createQName(DataListModel.DATALIST_MODEL_PREFIX, DATALIST_NAME),
-                    DataListModel.TYPE_DATALIST, contentProps).getChildRef();
-
+            ChildAssociationRef ref = nodeService.createNode(list, ContentModel.ASSOC_CONTAINS,
+                    DataListModel.TYPE_DATALIST_ITEM,
+                    EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM, contentProps);
+        } catch (Throwable ex) {
+            logger.error("Error performing action" + ex.getMessage());
+            logger.error(ex);
+            throw ex;
         }
-
-        Map<QName, Serializable> contentProps = new HashMap<>();
-        contentProps.put(EmailDocumentsAction.FROM, action.getParameterValue(PARAM_FROM));
-        contentProps.put(EmailDocumentsAction.TO,action.getParameterValue(PARAM_TO));
-        contentProps.put(EmailDocumentsAction.SUBJECT,action.getParameterValue(PARAM_SUBJECT));
-        contentProps.put(EmailDocumentsAction.BODY,action.getParameterValue(PARAM_BODY));
-        contentProps.put(EmailDocumentsAction.ATTACHMENT,attachmentName);
-        contentProps.put(EmailDocumentsAction.DATESENT,new Date());
-        contentProps.put(EmailDocumentsAction.CONVERT,action.getParameterValue(PARAM_CONVERT));
-
-        ChildAssociationRef ref = nodeService.createNode(list, ContentModel.ASSOC_CONTAINS,
-                DataListModel.TYPE_DATALIST_ITEM,
-                EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM, contentProps);
     }
 
     @Override
@@ -96,5 +100,4 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
         this.siteService = siteService;
     }
 
-    
 }

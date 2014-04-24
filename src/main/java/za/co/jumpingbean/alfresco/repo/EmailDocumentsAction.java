@@ -5,9 +5,15 @@
  */
 package za.co.jumpingbean.alfresco.repo;
 
+import com.sun.mail.iap.ByteArray;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.List;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -18,9 +24,11 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.ParameterDefinitionImpl;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
+import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.content.transform.ContentTransformer;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -28,7 +36,6 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
-import org.alfresco.service.cmr.rendition.RenditionService;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
@@ -82,14 +89,18 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
             mimeMessage.setHeader("Content-Transfer-Encoding", "text/html; charset=UTF-8");
             addAttachments(action, nodeRef, mimeMessage);
             mailService.send(mimeMessage);
+            logger.info("success!");
         } catch (AddressException ex) {
             logger.error("There was an error processing the email address for the mail documents action");
             logger.error(ex);
         } catch (MessagingException ex) {
             logger.error("There was an error processing the email for the mail documents action");
             logger.error(ex);
+        } catch (Exception ex) {
+            logger.error("There was an error processing the action");
+            logger.error(ex);
+            throw ex;
         }
-
     }
 
     @Override
@@ -103,71 +114,67 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
 
     public void addAttachments(final Action action, final NodeRef nodeRef, MimeMessage mimeMessage) throws MessagingException {
         String text = (String) action.getParameterValue(PARAM_BODY);
-        Boolean convert = (Boolean) action.getParameterValue(PARAM_CONVERT);
-        MimeMultipart attachments = new MimeMultipart("mixed");
+        Boolean convertToPDF = (Boolean) action.getParameterValue(PARAM_CONVERT);
+        MimeMultipart mail = new MimeMultipart("mixed");
         MimeBodyPart bodyText = new MimeBodyPart();
         bodyText.setText(text);
-        attachments.addBodyPart(bodyText);
+        mail.addBodyPart(bodyText);
         QName type = nodeService.getType(nodeRef);
-        attachmentName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
         if (type.isMatch(ContentModel.TYPE_FOLDER)
                 || type.isMatch(ContentModel.TYPE_CONTAINER)) {
             List<FileInfo> files = fileFolderService.listFiles(nodeRef);
             for (FileInfo file : files) {
                 NodeRef ref = file.getNodeRef();
-                addAttachement(ref, attachments, convert);
+                addAttachement(ref, mail, convertToPDF);
             }
         } else if (type.isMatch(ContentModel.TYPE_CONTENT)) {
-            addAttachement(nodeRef, attachments, convert);
+            addAttachement(nodeRef, mail, convertToPDF);
         }
-        mimeMessage.setContent(attachments);
+        mimeMessage.setContent(mail);
     }
 
     public void addAttachement(final NodeRef nodeRef, MimeMultipart content, final Boolean convert) throws MessagingException {
-        MimeBodyPart attachment = new MimeBodyPart();
-        attachment.setDataHandler(new DataHandler(new DataSource() {
 
-            ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
+        MappedByteBuffer buf;
+        byte[] array=new byte[0];
+        ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
+        String fileName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+        String type = reader.getMimetype().split("/")[0];
+        if (!type.equalsIgnoreCase("image")
+                && !reader.getMimetype().equalsIgnoreCase(MimetypeMap.MIMETYPE_PDF)
+                && convert) {
             ContentWriter writer = contentService.getTempWriter();
-
-            {
-                String type = reader.getMimetype().split("/")[0];
-                if (!type.equalsIgnoreCase("image") && 
-                        !reader.getMimetype().equalsIgnoreCase("application/PDF") && 
-                        convert) {
-                    ContentTransformer transformer = contentService.getTransformer(reader.getMimetype(), "application/PDF");
-                    if (transformer != null) {
-                        try {
-                            transformer.transform(reader, writer);
-                            reader = writer.getReader();
-                        } catch (ContentIOException ex) {
-                            logger.warn("could not transform content");
-                        }
-                    }
+            ContentTransformer transformer = contentService.getTransformer(reader.getMimetype(), MimetypeMap.MIMETYPE_PDF);
+            if (transformer != null) {
+                try {
+                    transformer.transform(reader, writer);
+                    reader = writer.getReader();
+                    fileName = fileName.substring(fileName.lastIndexOf('.'));
+                    fileName += ".pdf";
+                } catch (ContentIOException ex) {
+                    logger.warn("could not transform content");
                 }
             }
-
-            @Override
-            public InputStream getInputStream() throws IOException {
-                return reader.getContentInputStream();
+        }
+        try {
+            buf = reader.getFileChannel().map(FileChannel.MapMode.READ_ONLY, 0, reader.getSize());
+            if (reader.getSize() <= Integer.MAX_VALUE) {
+                array = new byte[(int) reader.getSize()];
+                buf.get(array);
             }
+        } catch (IOException ex) {
+            logger.error("There was an error reading file into memory.");
+            logger.error(ex);
+            array = new byte[0];
+        }
 
-            @Override
-            public OutputStream getOutputStream() throws IOException {
-                throw new IOException("Read-only data");
-            }
-
-            @Override
-            public String getContentType() {
-                return reader.getMimetype();
-            }
-
-            @Override
-            public String getName() {
-                return nodeService.getProperty(nodeRef, ContentModel.PROP_NAME).toString();
-            }
-        }));
-
+        //final String fileName = tmpName;
+        //final String mimeType = reader.getMimetype();
+        ByteArrayDataSource ds = new ByteArrayDataSource(array,reader.getMimetype());
+        MimeBodyPart attachment = new MimeBodyPart();
+        attachment.setFileName(fileName);
+        attachment.setDataHandler(
+                new DataHandler(ds));
         content.addBodyPart(attachment);
     }
 

@@ -5,17 +5,12 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.apache.log4j.Logger;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.tradeshift.test.remote.Remote;
-import com.tradeshift.test.remote.RemoteTestRunner;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -28,7 +23,6 @@ import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.util.ApplicationContextHelper;
 import org.alfresco.util.GUID;
 import org.junit.After;
 import org.junit.Before;
@@ -76,7 +70,6 @@ public class EmailDocumentsTest {
     @Autowired
     @Qualifier("FileFolderService")
     protected FileFolderService fileFolderService;
-    
 
     private StoreRef testStoreRef;
     private NodeRef rootNodeRef;
@@ -88,6 +81,8 @@ public class EmailDocumentsTest {
     private NodeRef file3;
     private NodeRef shadowFolder;
 
+    private static final Logger logger = Logger.getLogger(EmailDocumentsTest.class);
+
     @Before
     public void setup() {
         AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
@@ -95,42 +90,43 @@ public class EmailDocumentsTest {
         this.testStoreRef = this.nodeService.createStore(
                 StoreRef.PROTOCOL_WORKSPACE, "Test_"
                 + System.currentTimeMillis());
-        
+
         this.rootNodeRef = this.nodeService.getRootNode(this.testStoreRef);
-        
-        shadowFolder = nodeService.createNode(rootNodeRef,ContentModel.ASSOC_CHILDREN,
-                QName.createQName("{test}rootFolder"),ContentModel.TYPE_FOLDER).getChildRef();
+
+        shadowFolder = nodeService.createNode(rootNodeRef, ContentModel.ASSOC_CHILDREN,
+                QName.createQName("{test}rootFolder"), ContentModel.TYPE_FOLDER).getChildRef();
 
         // Create the node used for tests
         this.nodeRef = this.fileFolderService.create(
-                shadowFolder,"folder1",
+                shadowFolder, "folder1",
                 ContentModel.TYPE_FOLDER).getNodeRef();
-        
-        this.file1 = this.nodeService.createNode(nodeRef,ContentModel.ASSOC_CONTAINS,
-                QName.createQName("{test}file1"),ContentModel.TYPE_CONTENT ).getChildRef();
-        
+
+        this.file1 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
+                QName.createQName("{test}file1"), ContentModel.TYPE_CONTENT).getChildRef();
+        nodeService.setProperty(file1,ContentModel.PROP_NAME,"einstein.jpg");
         ContentWriter writer = contentService.getWriter(file1,
                 ContentModel.PROP_CONTENT, true);
         InputStream file = this.getClass().getClassLoader().getResourceAsStream("einstein.jpg");
         writer.setMimetype("image/jpg");
         writer.putContent(file);
 
-        this.file2 = this.nodeService.createNode(nodeRef,ContentModel.ASSOC_CONTAINS,
-                QName.createQName("{test}file2"),ContentModel.TYPE_CONTENT ).getChildRef();
+        this.file2 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
+                QName.createQName("{test}file2"), ContentModel.TYPE_CONTENT).getChildRef();
+        nodeService.setProperty(file2,ContentModel.PROP_NAME,"newton.jpg");
         writer = contentService.getWriter(file2,
                 ContentModel.PROP_CONTENT, true);
         file = this.getClass().getClassLoader().getResourceAsStream("newton.jpg");
         writer.setMimetype("image/jpg");
         writer.putContent(file);
 
-        this.file3 = this.nodeService.createNode(nodeRef,ContentModel.ASSOC_CONTAINS,
-                QName.createQName("{test}file3"),ContentModel.TYPE_CONTENT ).getChildRef();
+        this.file3 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
+                QName.createQName("{test}file3"), ContentModel.TYPE_CONTENT).getChildRef();
+        nodeService.setProperty(file3,ContentModel.PROP_NAME,"JumpingBeanLetterhead.odt");
         writer = contentService.getWriter(file3,
                 ContentModel.PROP_CONTENT, true);
         file = this.getClass().getClassLoader().getResourceAsStream("JumpingBeanLetterhead.odt");
         writer.setMimetype("application/vnd.oasis.opendocument.text");
-        writer.putContent(file);        
-        
+        writer.putContent(file);
     }
 
     @Test
@@ -140,17 +136,18 @@ public class EmailDocumentsTest {
             Map<String, Serializable> params = new HashMap<>();
             params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
             params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
-            params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test");
+            params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test - Image File");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
-            params.put(EmailDocumentsAction.PARAM_CONVERT,true);
+            params.put(EmailDocumentsAction.PARAM_CONVERT, true);
             Action action = serviceRegistry.getActionService().createAction("emailDocumentsAction", params);
-            serviceRegistry.getActionService().executeAction(action, this.file2);
+            serviceRegistry.getActionService().executeAction(action, this.file1);
             Assert.assertTrue("Email sent successfully", true);
         } catch (Exception ex) {
             Assert.assertTrue("Failed to send email ", false);
+            logger.error(ex);
         }
     }
-    
+
     @Test
     public void testEmailDocumentsActionFileWriter() {
         try {
@@ -158,17 +155,18 @@ public class EmailDocumentsTest {
             Map<String, Serializable> params = new HashMap<>();
             params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
             params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
-            params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test");
+            params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test - OO Document");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
-            params.put(EmailDocumentsAction.PARAM_CONVERT,true);
+            params.put(EmailDocumentsAction.PARAM_CONVERT, true);
             Action action = serviceRegistry.getActionService().createAction("emailDocumentsAction", params);
             serviceRegistry.getActionService().executeAction(action, this.file3);
             Assert.assertTrue("Email sent successfully", true);
         } catch (Exception ex) {
             Assert.assertTrue("Failed to send email ", false);
+            logger.error(ex);
         }
-    }    
-    
+    }
+
     @Test
     public void testEmailDocumentsActionFolder() {
         try {
@@ -178,21 +176,21 @@ public class EmailDocumentsTest {
             params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Folder Send Test");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
-            params.put(EmailDocumentsAction.PARAM_CONVERT,true);
+            params.put(EmailDocumentsAction.PARAM_CONVERT, true);
             Action action = serviceRegistry.getActionService().createAction("emailDocumentsAction", params);
             serviceRegistry.getActionService().executeAction(action, this.nodeRef);
             Assert.assertTrue("Folder contents sent successfully", true);
         } catch (Exception ex) {
             Assert.assertTrue("Failed to send folder contents -" + ex.getMessage(), false);
+            logger.error(ex);
         }
     }
 
-   
-    
     @After
     public void tearDown() {
         nodeService.deleteNode(file1);
         nodeService.deleteNode(file2);
+        nodeService.deleteNode(file3);
         nodeService.deleteNode(nodeRef);
         nodeService.deleteNode(shadowFolder);
     }

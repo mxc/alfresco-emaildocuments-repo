@@ -94,6 +94,7 @@ public class EmailDocumentsWithHistoryTest {
     @Autowired
     @Qualifier("FileFolderService")
     protected FileFolderService fileFolderService;    
+    private NodeRef file3;
 
     @Before
     public void setup() {
@@ -102,31 +103,42 @@ public class EmailDocumentsWithHistoryTest {
         this.testStoreRef = this.nodeService.createStore(
                 StoreRef.PROTOCOL_WORKSPACE, "Test_"
                 + System.currentTimeMillis());
+
         this.rootNodeRef = this.nodeService.getRootNode(this.testStoreRef);
 
-        shadowFolder = nodeService.createNode(rootNodeRef,ContentModel.ASSOC_CHILDREN,
-                QName.createQName("{test}rootFolder"),ContentModel.TYPE_FOLDER).getChildRef();
+        shadowFolder = nodeService.createNode(rootNodeRef, ContentModel.ASSOC_CHILDREN,
+                QName.createQName("{test}rootFolder"), ContentModel.TYPE_FOLDER).getChildRef();
 
         // Create the node used for tests
         this.nodeRef = this.fileFolderService.create(
-                shadowFolder,"folder1",
+                shadowFolder, "folder1",
                 ContentModel.TYPE_FOLDER).getNodeRef();
 
-        this.file1 = this.nodeService.createNode(nodeRef,ContentModel.ASSOC_CONTAINS,
-                QName.createQName("{test}file1"),ContentModel.TYPE_CONTENT ).getChildRef();
-
+        this.file1 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
+                QName.createQName("{test}file1"), ContentModel.TYPE_CONTENT).getChildRef();
+        nodeService.setProperty(file1,ContentModel.PROP_NAME,"einstein.jpg");
         ContentWriter writer = contentService.getWriter(file1,
                 ContentModel.PROP_CONTENT, true);
         InputStream file = this.getClass().getClassLoader().getResourceAsStream("einstein.jpg");
         writer.setMimetype("image/jpg");
         writer.putContent(file);
 
-        this.file2 = this.nodeService.createNode(nodeRef,ContentModel.ASSOC_CONTAINS,
-                QName.createQName("{test}file1"),ContentModel.TYPE_CONTENT ).getChildRef();
+        this.file2 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
+                QName.createQName("{test}file2"), ContentModel.TYPE_CONTENT).getChildRef();
+        nodeService.setProperty(file2,ContentModel.PROP_NAME,"newton.jpg");
         writer = contentService.getWriter(file2,
                 ContentModel.PROP_CONTENT, true);
         file = this.getClass().getClassLoader().getResourceAsStream("newton.jpg");
         writer.setMimetype("image/jpg");
+        writer.putContent(file);
+
+        this.file3 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
+                QName.createQName("{test}file3"), ContentModel.TYPE_CONTENT).getChildRef();
+        nodeService.setProperty(file3,ContentModel.PROP_NAME,"JumpingBeanLetterhead.odt");
+        writer = contentService.getWriter(file3,
+                ContentModel.PROP_CONTENT, true);
+        file = this.getClass().getClassLoader().getResourceAsStream("JumpingBeanLetterhead.odt");
+        writer.setMimetype("application/vnd.oasis.opendocument.text");
         writer.putContent(file);
 
         try {
