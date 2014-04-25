@@ -181,8 +181,6 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
             array = new byte[0];
         }
 
-        //final String fileName = tmpName;
-        //final String mimeType = reader.getMimetype();
         ByteArrayDataSource ds = new ByteArrayDataSource(array, reader.getMimetype());
         MimeBodyPart attachment = new MimeBodyPart();
         attachment.setFileName(fileName);

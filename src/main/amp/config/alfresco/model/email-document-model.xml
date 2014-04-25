@@ -54,6 +54,7 @@
                 </property>
                 <property name="jb:convert">
                     <type>d:boolean</type>
+                    <default>true</default>
                 </property>
             </properties>
         </aspect>

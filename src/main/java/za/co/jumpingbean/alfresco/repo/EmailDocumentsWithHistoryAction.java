@@ -32,8 +32,8 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
 
     public static final String PARAM_SITE = "site";
     private final String DATALIST_CONTAINER = "dataLists";
-    private final String DATALIST_NAME = "emailarchive";
-    private final Serializable DATALIST_DESCRIPTION = "Archive of document emails";
+    private final String DATALIST_NAME = "Email Archive";
+    private final Serializable DATALIST_DESCRIPTION = "Document email history";
 
     private SiteService siteService;
     private static final Logger logger = Logger.getLogger(EmailDocumentsWithHistoryAction.class);
@@ -45,13 +45,13 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
             String siteName = (String) action.getParameterValue(PARAM_SITE);
             SiteInfo siteInfo = siteService.getSite(siteName);
             String shortName = siteInfo.getShortName();
-        //Get site datalist container or create the data list container if it does not
+            //Get site datalist container or create the data list container if it does not
             //exist.
             NodeRef dataListContainer = siteService.getContainer(shortName, DATALIST_CONTAINER);
             if (dataListContainer == null) {
                 dataListContainer = siteService.createContainer(shortName, DATALIST_CONTAINER, ContentModel.TYPE_FOLDER, null);
             }
-
+            //Get the email archive data list or create it.
             NodeRef list = nodeService.getChildByName(dataListContainer, ContentModel.ASSOC_CONTAINS, DATALIST_NAME);
             if (list == null) {
                 Map<QName, Serializable> contentProps = new HashMap<>();
