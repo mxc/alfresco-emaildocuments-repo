@@ -14,7 +14,9 @@ import java.io.OutputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Message;
@@ -36,6 +38,7 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.model.FileInfo;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
@@ -119,16 +122,26 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         MimeBodyPart bodyText = new MimeBodyPart();
         bodyText.setText(text);
         mail.addBodyPart(bodyText);
+        
+        Queue<NodeRef> que = new LinkedList<>();
         QName type = nodeService.getType(nodeRef);
         if (type.isMatch(ContentModel.TYPE_FOLDER)
                 || type.isMatch(ContentModel.TYPE_CONTAINER)) {
-            List<FileInfo> files = fileFolderService.listFiles(nodeRef);
-            for (FileInfo file : files) {
-                NodeRef ref = file.getNodeRef();
-                addAttachement(ref, mail, convertToPDF);
-            }
-        } else if (type.isMatch(ContentModel.TYPE_CONTENT)) {
+            que.add(nodeRef);
+        } else {
             addAttachement(nodeRef, mail, convertToPDF);
+        }
+        while (!que.isEmpty()) {
+            NodeRef tmpNodeRef = que.remove();
+            List<ChildAssociationRef> list = nodeService.getChildAssocs(tmpNodeRef);
+            for (ChildAssociationRef childRef : list) {
+                NodeRef ref = childRef.getChildRef();
+                if (nodeService.getType(ref).isMatch(ContentModel.TYPE_CONTENT)) {
+                    addAttachement(ref, mail, convertToPDF);
+                } else {
+                    que.add(ref);
+                }
+            }
         }
         mimeMessage.setContent(mail);
     }
@@ -136,7 +149,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
     public void addAttachement(final NodeRef nodeRef, MimeMultipart content, final Boolean convert) throws MessagingException {
 
         MappedByteBuffer buf;
-        byte[] array=new byte[0];
+        byte[] array = new byte[0];
         ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
         String fileName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
         String type = reader.getMimetype().split("/")[0];
@@ -170,7 +183,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
 
         //final String fileName = tmpName;
         //final String mimeType = reader.getMimetype();
-        ByteArrayDataSource ds = new ByteArrayDataSource(array,reader.getMimetype());
+        ByteArrayDataSource ds = new ByteArrayDataSource(array, reader.getMimetype());
         MimeBodyPart attachment = new MimeBodyPart();
         attachment.setFileName(fileName);
         attachment.setDataHandler(
