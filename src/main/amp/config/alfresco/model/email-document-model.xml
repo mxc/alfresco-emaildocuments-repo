@@ -18,13 +18,10 @@
     </namespaces>
     
     <types>
-        <type name="jb:emailHistoryList">
+        <type name="jb:emailHistoryListItem">
             <title>Email History List</title>
             <parent>dl:dataListItem</parent>
             <properties>
-                <property name="jb:attachment">
-                    <type>d:text</type>
-                </property>
                 <property name="jb:dateSent">
                     <type>d:date</type>
                 </property>
@@ -32,12 +29,37 @@
                     <type>d:text</type>
                 </property>
             </properties>
+            <associations>
+                <association name="jb:sender">
+                    <title>Sender</title>
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </source>
+                    <target>
+                        <class>cm:person</class>
+                        <mandatory>true</mandatory>
+                        <many>false</many>
+                    </target>
+                </association>
+                <association name="jb:attachments">
+                    <title>Attachments</title>
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </source>
+                    <target>
+                        <class>cm:cmobject</class>
+                        <mandatory>true</mandatory>
+                        <many>true</many>
+                    </target>
+                </association>
+            </associations>             
             <mandatory-aspects>
                 <aspect>jb:emailTemplate</aspect>
-            </mandatory-aspects>   
+            </mandatory-aspects> 
         </type>
     </types>
-    
     
     <aspects>
         <aspect name="jb:emailTemplate">
@@ -58,6 +80,8 @@
                 </property>
             </properties>
         </aspect>
+        <aspect name="jb:emailable" />
+        <aspect name="jb:emailableWithHistory" />
     </aspects>
     
 </model>

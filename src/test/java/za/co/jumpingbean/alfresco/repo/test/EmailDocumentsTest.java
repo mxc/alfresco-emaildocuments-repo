@@ -1,3 +1,4 @@
+
 package za.co.jumpingbean.alfresco.repo.test;
 
 import org.alfresco.model.ContentModel;
@@ -16,6 +17,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.Assert;
+import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -125,7 +127,7 @@ public class EmailDocumentsTest {
         writer = contentService.getWriter(file3,
                 ContentModel.PROP_CONTENT, true);
         file = this.getClass().getClassLoader().getResourceAsStream("JumpingBeanLetterhead.odt");
-        writer.setMimetype("application/vnd.oasis.opendocument.text");
+        writer.setMimetype(MimetypeMap.MIMETYPE_OPENDOCUMENT_TEXT);
         writer.putContent(file);
     }
 
@@ -135,7 +137,7 @@ public class EmailDocumentsTest {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
             params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
-            params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
+            params.put(EmailDocumentsAction.PARAM_TO, "mark@home.lan");
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test - Image File");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
             params.put(EmailDocumentsAction.PARAM_CONVERT, true);
@@ -154,7 +156,7 @@ public class EmailDocumentsTest {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
             params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
-            params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
+            params.put(EmailDocumentsAction.PARAM_TO, "mark@home.lan");
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test - OO Document");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
             params.put(EmailDocumentsAction.PARAM_CONVERT, true);
@@ -173,7 +175,7 @@ public class EmailDocumentsTest {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
             params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
-            params.put(EmailDocumentsAction.PARAM_TO, "mark@jumpingbean.co.za");
+            params.put(EmailDocumentsAction.PARAM_TO, "mark@home.lan");
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Folder Send Test");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
             params.put(EmailDocumentsAction.PARAM_CONVERT, true);

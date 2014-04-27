@@ -5,20 +5,13 @@
  */
 package za.co.jumpingbean.alfresco.repo;
 
-import com.sun.mail.iap.ByteArray;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -37,12 +30,13 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.model.FileFolderService;
-import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
+import org.alfresco.service.cmr.repository.MimetypeService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
@@ -62,10 +56,10 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
     public static final String PARAM_BODY = "body";
     public static final String PARAM_FROM = "from";
     public static final String PARAM_CONVERT = "convert";
-    public static final String PARAM_ATTACHMENT = "attachement";
+    public static final String PARAM_ATTACHMENT = "attachments";
 
     public static final String URI = "http://www.jumpingbean.co.za/model/content/1.0";
-    public static final String TYPE = "emailHistoryList";
+    public static final String TYPE = "emailHistoryListItem";
     public static final QName TYPE_EMAIL_DOCUMENT_ITEM = QName.createQName(URI, TYPE);
     public static QName FROM = QName.createQName(URI, EmailDocumentsAction.PARAM_FROM);
     public static QName TO = QName.createQName(URI, EmailDocumentsAction.PARAM_TO);
@@ -74,13 +68,14 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
     public static QName ATTACHMENT = QName.createQName(URI, EmailDocumentsAction.PARAM_ATTACHMENT);
     public static QName CONVERT = QName.createQName(URI, EmailDocumentsAction.PARAM_CONVERT);
     public static QName DATESENT = QName.createQName(URI, "dateSent");
+    public static QName SENDER = QName.createQName(URI, "sender");
 
     private ServiceRegistry serviceRegistry;
     private ContentService contentService;
     protected NodeService nodeService;
     protected JavaMailSender mailService;
     protected FileFolderService fileFolderService;
-    protected String attachmentName;
+    protected MimetypeService mimetypeService;
 
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
@@ -122,7 +117,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         MimeBodyPart bodyText = new MimeBodyPart();
         bodyText.setText(text);
         mail.addBodyPart(bodyText);
-        
+
         Queue<NodeRef> que = new LinkedList<>();
         QName type = nodeService.getType(nodeRef);
         if (type.isMatch(ContentModel.TYPE_FOLDER)
@@ -157,15 +152,20 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
                 && !reader.getMimetype().equalsIgnoreCase(MimetypeMap.MIMETYPE_PDF)
                 && convert) {
             ContentWriter writer = contentService.getTempWriter();
-            ContentTransformer transformer = contentService.getTransformer(reader.getMimetype(), MimetypeMap.MIMETYPE_PDF);
+            writer.setMimetype(MimetypeMap.MIMETYPE_PDF);
+            String srcMimeType = reader.getMimetype();
+            //String srcMimeType = ((ContentData) nodeService.getProperty(nodeRef, ContentModel.PROP_CONTENT)).getMimetype();
+            //String srcMimeType = this.getMimeTypeForFileName(fileName);
+            ContentTransformer transformer = contentService.getTransformer(srcMimeType, MimetypeMap.MIMETYPE_PDF);
             if (transformer != null) {
                 try {
                     transformer.transform(reader, writer);
                     reader = writer.getReader();
-                    fileName = fileName.substring(fileName.lastIndexOf('.'));
+                    fileName = fileName.substring(0, fileName.lastIndexOf('.'));
                     fileName += ".pdf";
                 } catch (ContentIOException ex) {
                     logger.warn("could not transform content");
+                    logger.warn(ex);
                 }
             }
         }
@@ -187,6 +187,20 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         attachment.setDataHandler(
                 new DataHandler(ds));
         content.addBodyPart(attachment);
+    }
+
+    public String getMimeTypeForFileName(String filename) {
+        String mimetype = MimetypeMap.MIMETYPE_BINARY;
+        int extIndex = filename.lastIndexOf('.');
+        if (extIndex != -1) {
+            String ext = filename.substring(extIndex + 1).toLowerCase();
+            String mt = mimetypeService.getMimetypesByExtension().get(ext);
+            if (mt != null) {
+                mimetype = mt;
+            }
+        }
+
+        return mimetype;
     }
 
     public ServiceRegistry getServiceRegistry() {
@@ -229,4 +243,13 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         this.contentService = contentService;
     }
 
+    public MimetypeService getMimetypeService() {
+        return mimetypeService;
+    }
+
+    public void setMimetypeService(MimetypeService mimetypeService) {
+        this.mimetypeService = mimetypeService;
+    }
+
+    
 }

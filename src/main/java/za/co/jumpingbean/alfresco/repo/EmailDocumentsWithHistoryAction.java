@@ -18,6 +18,8 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
@@ -37,7 +39,9 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
 
     private SiteService siteService;
     private static final Logger logger = Logger.getLogger(EmailDocumentsWithHistoryAction.class);
-    
+    private AuthenticationService authenticationService;
+    private PersonService personService;
+
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
         try {
@@ -52,13 +56,24 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
                 dataListContainer = siteService.createContainer(shortName, DATALIST_CONTAINER, ContentModel.TYPE_FOLDER, null);
             }
             //Get the email archive data list or create it.
-            NodeRef list = nodeService.getChildByName(dataListContainer, ContentModel.ASSOC_CONTAINS, DATALIST_NAME);
+            NodeRef list = null;
+            List<ChildAssociationRef> children = nodeService.getChildAssocs(dataListContainer);
+            for (ChildAssociationRef child : children) {
+                Map<QName, Serializable> properties = nodeService.getProperties(child.getChildRef());
+                if (properties.containsKey(DataListModel.PROP_DATALIST_ITEM_TYPE)) {
+                    String name = (String) properties.get(DataListModel.PROP_DATALIST_ITEM_TYPE);
+                    if (name.equals("jb:emailHistoryListItem")) {
+                        list = child.getChildRef();
+                    }
+                }
+            }
+
             if (list == null) {
                 Map<QName, Serializable> contentProps = new HashMap<>();
                 contentProps.put(ContentModel.PROP_TITLE, DATALIST_NAME);
                 contentProps.put(ContentModel.PROP_DESCRIPTION, DATALIST_DESCRIPTION);
                 contentProps.put(DataListModel.PROP_DATALIST_ITEM_TYPE,
-                        EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM);
+                        "jb:emailHistoryListItem");
 
                 list = nodeService.createNode(dataListContainer, ContentModel.ASSOC_CONTAINS,
                         QName.createQName(DataListModel.DATALIST_MODEL_PREFIX, DATALIST_NAME),
@@ -71,13 +86,20 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
             contentProps.put(EmailDocumentsAction.TO, action.getParameterValue(PARAM_TO));
             contentProps.put(EmailDocumentsAction.SUBJECT, action.getParameterValue(PARAM_SUBJECT));
             contentProps.put(EmailDocumentsAction.BODY, action.getParameterValue(PARAM_BODY));
-            contentProps.put(EmailDocumentsAction.ATTACHMENT, attachmentName);
+//            contentProps.put(EmailDocumentsAction.SENDER,personService.getPerson(this.authenticationService.getCurrentUserName()));
+//            contentProps.put(EmailDocumentsAction.ATTACHMENT,nodeRef);
             contentProps.put(EmailDocumentsAction.DATESENT, new Date());
             contentProps.put(EmailDocumentsAction.CONVERT, action.getParameterValue(PARAM_CONVERT));
 
             ChildAssociationRef ref = nodeService.createNode(list, ContentModel.ASSOC_CONTAINS,
-                    DataListModel.TYPE_DATALIST_ITEM,
+                    DataListModel.TYPE_DATALIST,
                     EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM, contentProps);
+            nodeService.createAssociation(ref.getChildRef(),
+                    personService.getPerson(this.authenticationService.getCurrentUserName()),
+                    EmailDocumentsAction.SENDER);
+            nodeService.createAssociation(ref.getChildRef(),
+                    nodeRef,
+                    EmailDocumentsAction.ATTACHMENT);
         } catch (Throwable ex) {
             logger.error("Error performing action" + ex.getMessage());
             logger.error(ex);
@@ -100,4 +122,19 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
         this.siteService = siteService;
     }
 
+    public AuthenticationService getAuthenticationService() {
+        return authenticationService;
+    }
+
+    public void setAuthenticationService(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
+
+    public PersonService getPersonService() {
+        return personService;
+    }
+
+    public void setPersonService(PersonService personService) {
+        this.personService = personService;
+    }
 }

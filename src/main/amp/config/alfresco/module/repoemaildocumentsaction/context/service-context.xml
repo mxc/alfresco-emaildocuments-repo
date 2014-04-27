@@ -25,6 +25,9 @@
         <property name="contentService">
             <ref bean="contentService" />
         </property>
+        <property name="mimetypeService">
+            <ref bean="mimetypeService" />
+        </property>
     </bean>   
     
     <bean id="emailDocumentsWithHistoryAction"
@@ -46,6 +49,12 @@
         </property>
         <property name="contentService">
             <ref bean="contentService" />
+        </property>
+        <property name="authenticationService">
+            <ref bean="authenticationService" />
+        </property>
+        <property name="personService">
+            <ref bean="personService" />
         </property>
     </bean>   
 
