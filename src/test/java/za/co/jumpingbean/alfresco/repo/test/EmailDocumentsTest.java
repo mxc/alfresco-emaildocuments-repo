@@ -85,6 +85,10 @@ public class EmailDocumentsTest {
 
     private static final Logger logger = Logger.getLogger(EmailDocumentsTest.class);
 
+    private static final String FROM="from@jumpingbean.co.za";
+    private static final String TO="to@jumpingbean.co.za";
+    
+    
     @Before
     public void setup() {
         AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
@@ -136,8 +140,8 @@ public class EmailDocumentsTest {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
-            params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
-            params.put(EmailDocumentsAction.PARAM_TO, "mark@home.lan");
+            params.put(EmailDocumentsAction.PARAM_FROM, FROM);
+            params.put(EmailDocumentsAction.PARAM_TO, TO);
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test - Image File");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
             params.put(EmailDocumentsAction.PARAM_CONVERT, true);
@@ -145,7 +149,7 @@ public class EmailDocumentsTest {
             serviceRegistry.getActionService().executeAction(action, this.file1);
             Assert.assertTrue("Email sent successfully", true);
         } catch (Exception ex) {
-            Assert.assertTrue("Failed to send email ", false);
+            Assert.assertTrue(ex.getMessage(), false);
             logger.error(ex);
         }
     }
@@ -155,8 +159,8 @@ public class EmailDocumentsTest {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
-            params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
-            params.put(EmailDocumentsAction.PARAM_TO, "mark@home.lan");
+            params.put(EmailDocumentsAction.PARAM_FROM, FROM);
+            params.put(EmailDocumentsAction.PARAM_TO, TO);
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test - OO Document");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
             params.put(EmailDocumentsAction.PARAM_CONVERT, true);
@@ -164,7 +168,7 @@ public class EmailDocumentsTest {
             serviceRegistry.getActionService().executeAction(action, this.file3);
             Assert.assertTrue("Email sent successfully", true);
         } catch (Exception ex) {
-            Assert.assertTrue("Failed to send email ", false);
+            Assert.assertTrue(ex.getMessage(), false);
             logger.error(ex);
         }
     }
@@ -174,8 +178,8 @@ public class EmailDocumentsTest {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
-            params.put(EmailDocumentsAction.PARAM_FROM, "testing@jumpingbean.co.za");
-            params.put(EmailDocumentsAction.PARAM_TO, "mark@home.lan");
+            params.put(EmailDocumentsAction.PARAM_FROM, FROM);
+            params.put(EmailDocumentsAction.PARAM_TO, TO);
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Folder Send Test");
             params.put(EmailDocumentsAction.PARAM_BODY, "Test Body");
             params.put(EmailDocumentsAction.PARAM_CONVERT, true);
