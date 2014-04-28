@@ -39,4 +39,6 @@ in future and the actual asserts improved.
 How to Use
 -----------
 To make use of the action you will need to install the ShareEmailDocuments amp 
-in the companion project   
+in the companion project. It can be found here:
+
+        https://github.com/mxc/alfresco-emaildocuments-share
