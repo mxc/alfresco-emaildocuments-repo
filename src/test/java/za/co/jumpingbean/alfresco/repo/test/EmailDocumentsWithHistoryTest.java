@@ -93,8 +93,11 @@ public class EmailDocumentsWithHistoryTest {
     private NodeRef shadowFolder;
     @Autowired
     @Qualifier("FileFolderService")
-    protected FileFolderService fileFolderService;    
+    protected FileFolderService fileFolderService;
     private NodeRef file3;
+
+    private static final String FROM = "from@jumpingbean.co.za";
+    private static final String TO = "to@jumpingbean.co.za";
 
     @Before
     public void setup() {
@@ -116,7 +119,7 @@ public class EmailDocumentsWithHistoryTest {
 
         this.file1 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
                 QName.createQName("{test}file1"), ContentModel.TYPE_CONTENT).getChildRef();
-        nodeService.setProperty(file1,ContentModel.PROP_NAME,"einstein.jpg");
+        nodeService.setProperty(file1, ContentModel.PROP_NAME, "einstein.jpg");
         ContentWriter writer = contentService.getWriter(file1,
                 ContentModel.PROP_CONTENT, true);
         InputStream file = this.getClass().getClassLoader().getResourceAsStream("einstein.jpg");
@@ -125,7 +128,7 @@ public class EmailDocumentsWithHistoryTest {
 
         this.file2 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
                 QName.createQName("{test}file2"), ContentModel.TYPE_CONTENT).getChildRef();
-        nodeService.setProperty(file2,ContentModel.PROP_NAME,"newton.jpg");
+        nodeService.setProperty(file2, ContentModel.PROP_NAME, "newton.jpg");
         writer = contentService.getWriter(file2,
                 ContentModel.PROP_CONTENT, true);
         file = this.getClass().getClassLoader().getResourceAsStream("newton.jpg");
@@ -134,7 +137,7 @@ public class EmailDocumentsWithHistoryTest {
 
         this.file3 = this.nodeService.createNode(nodeRef, ContentModel.ASSOC_CONTAINS,
                 QName.createQName("{test}file3"), ContentModel.TYPE_CONTENT).getChildRef();
-        nodeService.setProperty(file3,ContentModel.PROP_NAME,"JumpingBeanLetterhead.odt");
+        nodeService.setProperty(file3, ContentModel.PROP_NAME, "JumpingBeanLetterhead.odt");
         writer = contentService.getWriter(file3,
                 ContentModel.PROP_CONTENT, true);
         file = this.getClass().getClassLoader().getResourceAsStream("JumpingBeanLetterhead.odt");
@@ -164,17 +167,17 @@ public class EmailDocumentsWithHistoryTest {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
-            params.put(EmailDocumentsWithHistoryAction.PARAM_FROM, "testing@jumpingbean.co.za");
-            params.put(EmailDocumentsWithHistoryAction.PARAM_TO, "mark@jumpingbean.co.za");
+            params.put(EmailDocumentsWithHistoryAction.PARAM_FROM, FROM);
+            params.put(EmailDocumentsWithHistoryAction.PARAM_TO, TO);
             params.put(EmailDocumentsWithHistoryAction.PARAM_SUBJECT, "Test Email With History Subject");
             params.put(EmailDocumentsWithHistoryAction.PARAM_BODY, "Test Body");
             params.put(EmailDocumentsWithHistoryAction.PARAM_SITE, siteInfo.getShortName());
-            params.put(EmailDocumentsWithHistoryAction.PARAM_CONVERT,true);  
+            params.put(EmailDocumentsWithHistoryAction.PARAM_CONVERT, true);
             Action action = serviceRegistry.getActionService().createAction("emailDocumentsWithHistoryAction", params);
             serviceRegistry.getActionService().executeAction(action, this.file1);
             Assert.assertTrue("Email sent successfully", true);
         } catch (Exception ex) {
-            Assert.assertTrue("Failed to send email ", false);
+            Assert.assertTrue(ex.getMessage(), false);
         }
     }
 
@@ -183,12 +186,12 @@ public class EmailDocumentsWithHistoryTest {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             Map<String, Serializable> params = new HashMap<>();
-            params.put(EmailDocumentsWithHistoryAction.PARAM_FROM, "testing@jumpingbean.co.za");
-            params.put(EmailDocumentsWithHistoryAction.PARAM_TO, "mark@jumpingbean.co.za");
+            params.put(EmailDocumentsWithHistoryAction.PARAM_FROM, FROM);
+            params.put(EmailDocumentsWithHistoryAction.PARAM_TO, TO);
             params.put(EmailDocumentsWithHistoryAction.PARAM_SUBJECT, "Test Email Folder With History Subject");
             params.put(EmailDocumentsWithHistoryAction.PARAM_BODY, "Test Body");
             params.put(EmailDocumentsWithHistoryAction.PARAM_SITE, siteInfo.getShortName());
-            params.put(EmailDocumentsWithHistoryAction.PARAM_CONVERT,true);              
+            params.put(EmailDocumentsWithHistoryAction.PARAM_CONVERT, true);
             Action action = serviceRegistry.getActionService().createAction("emailDocumentsWithHistoryAction", params);
             serviceRegistry.getActionService().executeAction(action, this.nodeRef);
             Assert.assertTrue("Email sent successfully", true);
