@@ -74,7 +74,7 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
             }
 
             if (list == null) {
-                Map<QName, Serializable> contentProps = new HashMap<QName, Serializable>();
+                Map<QName, Serializable> contentProps = new HashMap<>();
                 contentProps.put(ContentModel.PROP_TITLE, DATALIST_NAME);
                 contentProps.put(ContentModel.PROP_DESCRIPTION, DATALIST_DESCRIPTION);
                 contentProps.put(DataListModel.PROP_DATALIST_ITEM_TYPE,
@@ -86,7 +86,7 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
 
             }
 
-            Map<QName, Serializable> contentProps = new HashMap<QName, Serializable>();
+            Map<QName, Serializable> contentProps = new HashMap<>();
             contentProps.put(EmailDocumentsAction.FROM, action.getParameterValue(PARAM_FROM));
             contentProps.put(EmailDocumentsAction.TO, action.getParameterValue(PARAM_TO));
             contentProps.put(EmailDocumentsAction.SUBJECT, action.getParameterValue(PARAM_SUBJECT));
@@ -105,23 +105,7 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
             nodeService.createAssociation(ref.getChildRef(),
                     nodeRef,
                     EmailDocumentsAction.ATTACHMENT);
-        } catch (AuthenticationException ex) {
-            logger.error("Error performing action" + ex.getMessage());
-            logger.error(ex);
-            throw ex;
-        } catch (InvalidTypeException ex) {
-            logger.error("Error performing action" + ex.getMessage());
-            logger.error(ex);
-            throw ex;
-        } catch (AssociationExistsException ex) {
-            logger.error("Error performing action" + ex.getMessage());
-            logger.error(ex);
-            throw ex;
-        } catch (InvalidNodeRefException ex) {
-            logger.error("Error performing action" + ex.getMessage());
-            logger.error(ex);
-            throw ex;
-        } catch (InvalidQNameException ex) {
+        } catch (AuthenticationException | InvalidTypeException | AssociationExistsException | InvalidNodeRefException | InvalidQNameException ex) {
             logger.error("Error performing action" + ex.getMessage());
             logger.error(ex);
             throw ex;

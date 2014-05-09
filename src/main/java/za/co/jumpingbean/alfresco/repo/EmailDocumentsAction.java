@@ -31,7 +31,6 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
@@ -118,7 +117,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         bodyText.setText(text);
         mail.addBodyPart(bodyText);
 
-        Queue<NodeRef> que = new LinkedList<NodeRef>();
+        Queue<NodeRef> que = new LinkedList<>();
         QName type = nodeService.getType(nodeRef);
         if (type.isMatch(ContentModel.TYPE_FOLDER)
                 || type.isMatch(ContentModel.TYPE_CONTAINER)) {

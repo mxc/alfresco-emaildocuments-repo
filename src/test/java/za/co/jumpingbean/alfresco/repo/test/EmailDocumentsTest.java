@@ -139,7 +139,7 @@ public class EmailDocumentsTest {
     public void testEmailDocumentsActionFileImage() {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
-            Map<String, Serializable> params = new HashMap<String, Serializable>();
+            Map<String, Serializable> params = new HashMap<>();
             params.put(EmailDocumentsAction.PARAM_FROM, FROM);
             params.put(EmailDocumentsAction.PARAM_TO, TO);
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test - Image File");
@@ -158,7 +158,7 @@ public class EmailDocumentsTest {
     public void testEmailDocumentsActionFileWriter() {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
-            Map<String, Serializable> params = new HashMap<String, Serializable>();
+            Map<String, Serializable> params = new HashMap<>();
             params.put(EmailDocumentsAction.PARAM_FROM, FROM);
             params.put(EmailDocumentsAction.PARAM_TO, TO);
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Single File Test - OO Document");
@@ -177,7 +177,7 @@ public class EmailDocumentsTest {
     public void testEmailDocumentsActionFolder() {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
-            Map<String, Serializable> params = new HashMap<String, Serializable>();
+            Map<String, Serializable> params = new HashMap<>();
             params.put(EmailDocumentsAction.PARAM_FROM, FROM);
             params.put(EmailDocumentsAction.PARAM_TO, TO);
             params.put(EmailDocumentsAction.PARAM_SUBJECT, "Folder Send Test");
