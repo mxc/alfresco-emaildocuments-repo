@@ -61,7 +61,7 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
                         EmailDocumentsAction.TYPE_EMAIL_DOCUMENT_ITEM);
 
                 list = nodeService.createNode(dataListContainer, ContentModel.ASSOC_CONTAINS,
-                        QName.createQName(DataListModel.DATALIST_MODEL_PREFIX, DATALIST_NAME),
+                        QName.createQName(EmailDocumentsAction.URI, DATALIST_NAME),
                         DataListModel.TYPE_DATALIST, contentProps).getChildRef();
 
             }
