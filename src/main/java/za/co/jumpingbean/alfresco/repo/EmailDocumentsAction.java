@@ -41,6 +41,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 
 /**
@@ -94,10 +95,9 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         } catch (MessagingException ex) {
             logger.error("There was an error processing the email for the mail documents action");
             logger.error(ex);
-        } catch (Exception ex) {
+        } catch (MailException ex) {
             logger.error("There was an error processing the action");
             logger.error(ex);
-            throw ex;
         }
     }
 
@@ -118,7 +118,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         bodyText.setText(text);
         mail.addBodyPart(bodyText);
 
-        Queue<NodeRef> que = new LinkedList<>();
+        Queue<NodeRef> que = new LinkedList<NodeRef>();
         QName type = nodeService.getType(nodeRef);
         if (type.isMatch(ContentModel.TYPE_FOLDER)
                 || type.isMatch(ContentModel.TYPE_CONTAINER)) {
@@ -166,6 +166,8 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
                 } catch (ContentIOException ex) {
                     logger.warn("could not transform content");
                     logger.warn(ex);
+                    //need to refresh reader as the transformer failing closes the reader
+                    reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
                 }
             }
         }

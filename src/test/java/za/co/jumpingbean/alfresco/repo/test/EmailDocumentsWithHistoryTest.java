@@ -19,6 +19,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.model.FileFolderService;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -156,7 +157,19 @@ public class EmailDocumentsWithHistoryTest {
             trx.commit();
         } catch (SiteServiceException ex) {
             siteInfo = this.siteService.getSite("TestSite");
-        } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException ex) {
+        } catch (NotSupportedException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (SystemException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (RollbackException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (HeuristicMixedException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (HeuristicRollbackException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (SecurityException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (IllegalStateException ex) {
             throw new junit.framework.AssertionFailedError("Error setting up test");
         }
 
@@ -166,7 +179,7 @@ public class EmailDocumentsWithHistoryTest {
     public void testEmailDocumentsWithHistoryAction() {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
-            Map<String, Serializable> params = new HashMap<>();
+            Map<String, Serializable> params = new HashMap<String, Serializable>();
             params.put(EmailDocumentsWithHistoryAction.PARAM_FROM, FROM);
             params.put(EmailDocumentsWithHistoryAction.PARAM_TO, TO);
             params.put(EmailDocumentsWithHistoryAction.PARAM_SUBJECT, "Test Email With History Subject");
@@ -185,7 +198,7 @@ public class EmailDocumentsWithHistoryTest {
     public void testEmailFolderWithHistoryAction() {
         try {
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
-            Map<String, Serializable> params = new HashMap<>();
+            Map<String, Serializable> params = new HashMap<String, Serializable>();
             params.put(EmailDocumentsWithHistoryAction.PARAM_FROM, FROM);
             params.put(EmailDocumentsWithHistoryAction.PARAM_TO, TO);
             params.put(EmailDocumentsWithHistoryAction.PARAM_SUBJECT, "Test Email Folder With History Subject");
@@ -210,7 +223,21 @@ public class EmailDocumentsWithHistoryTest {
             nodeService.deleteNode(file2);
             nodeService.deleteNode(nodeRef);
             trx.commit();
-        } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException ex) {
+        } catch (NotSupportedException  ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (SystemException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (InvalidNodeRefException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (RollbackException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (HeuristicMixedException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (HeuristicRollbackException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (SecurityException ex) {
+            throw new junit.framework.AssertionFailedError("Error setting up test");
+        } catch (IllegalStateException ex) {
             throw new junit.framework.AssertionFailedError("Error setting up test");
         }
     }

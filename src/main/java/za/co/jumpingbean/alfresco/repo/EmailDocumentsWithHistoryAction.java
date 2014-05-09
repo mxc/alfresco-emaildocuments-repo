@@ -13,15 +13,20 @@ import java.util.Map;
 import org.alfresco.model.ContentModel;
 import org.alfresco.model.DataListModel;
 import org.alfresco.repo.action.ParameterDefinitionImpl;
+import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
+import org.alfresco.service.cmr.dictionary.InvalidTypeException;
+import org.alfresco.service.cmr.repository.AssociationExistsException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
+import org.alfresco.service.namespace.InvalidQNameException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import static za.co.jumpingbean.alfresco.repo.EmailDocumentsAction.PARAM_BODY;
@@ -69,19 +74,19 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
             }
 
             if (list == null) {
-                Map<QName, Serializable> contentProps = new HashMap<>();
+                Map<QName, Serializable> contentProps = new HashMap<QName, Serializable>();
                 contentProps.put(ContentModel.PROP_TITLE, DATALIST_NAME);
                 contentProps.put(ContentModel.PROP_DESCRIPTION, DATALIST_DESCRIPTION);
                 contentProps.put(DataListModel.PROP_DATALIST_ITEM_TYPE,
                         "jb:emailHistoryListItem");
 
                 list = nodeService.createNode(dataListContainer, ContentModel.ASSOC_CONTAINS,
-                        QName.createQName(EmailDocumentsAction.URI, DATALIST_NAME),
+                        QName.createQName(DataListModel.DATALIST_MODEL_PREFIX, DATALIST_NAME),
                         DataListModel.TYPE_DATALIST, contentProps).getChildRef();
 
             }
 
-            Map<QName, Serializable> contentProps = new HashMap<>();
+            Map<QName, Serializable> contentProps = new HashMap<QName, Serializable>();
             contentProps.put(EmailDocumentsAction.FROM, action.getParameterValue(PARAM_FROM));
             contentProps.put(EmailDocumentsAction.TO, action.getParameterValue(PARAM_TO));
             contentProps.put(EmailDocumentsAction.SUBJECT, action.getParameterValue(PARAM_SUBJECT));
@@ -100,7 +105,23 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
             nodeService.createAssociation(ref.getChildRef(),
                     nodeRef,
                     EmailDocumentsAction.ATTACHMENT);
-        } catch (Throwable ex) {
+        } catch (AuthenticationException ex) {
+            logger.error("Error performing action" + ex.getMessage());
+            logger.error(ex);
+            throw ex;
+        } catch (InvalidTypeException ex) {
+            logger.error("Error performing action" + ex.getMessage());
+            logger.error(ex);
+            throw ex;
+        } catch (AssociationExistsException ex) {
+            logger.error("Error performing action" + ex.getMessage());
+            logger.error(ex);
+            throw ex;
+        } catch (InvalidNodeRefException ex) {
+            logger.error("Error performing action" + ex.getMessage());
+            logger.error(ex);
+            throw ex;
+        } catch (InvalidQNameException ex) {
             logger.error("Error performing action" + ex.getMessage());
             logger.error(ex);
             throw ex;
