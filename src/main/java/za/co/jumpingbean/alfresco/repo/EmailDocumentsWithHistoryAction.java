@@ -89,6 +89,7 @@ public class EmailDocumentsWithHistoryAction extends EmailDocumentsAction {
             Map<QName, Serializable> contentProps = new HashMap<>();
             contentProps.put(EmailDocumentsAction.FROM, action.getParameterValue(PARAM_FROM));
             contentProps.put(EmailDocumentsAction.TO, action.getParameterValue(PARAM_TO));
+            contentProps.put(EmailDocumentsAction.BCC, action.getParameterValue(PARAM_BCC));
             contentProps.put(EmailDocumentsAction.SUBJECT, action.getParameterValue(PARAM_SUBJECT));
             contentProps.put(EmailDocumentsAction.BODY, action.getParameterValue(PARAM_BODY));
 //            contentProps.put(EmailDocumentsAction.SENDER,personService.getPerson(this.authenticationService.getCurrentUserName()));

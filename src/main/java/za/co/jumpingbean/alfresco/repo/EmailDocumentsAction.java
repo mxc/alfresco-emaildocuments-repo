@@ -55,6 +55,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
     public static final String PARAM_SUBJECT = "subject";
     public static final String PARAM_BODY = "body";
     public static final String PARAM_FROM = "from";
+    public static final String PARAM_BCC = "bcc";
     public static final String PARAM_CONVERT = "convert";
     public static final String PARAM_ATTACHMENT = "attachments";
 
@@ -64,6 +65,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
     public static QName FROM = QName.createQName(URI, EmailDocumentsAction.PARAM_FROM);
     public static QName TO = QName.createQName(URI, EmailDocumentsAction.PARAM_TO);
     public static QName BODY = QName.createQName(URI, EmailDocumentsAction.PARAM_BODY);
+    public static QName BCC = QName.createQName(URI, EmailDocumentsAction.PARAM_BCC);
     public static QName SUBJECT = QName.createQName(URI, EmailDocumentsAction.PARAM_SUBJECT);
     public static QName ATTACHMENT = QName.createQName(URI, EmailDocumentsAction.PARAM_ATTACHMENT);
     public static QName CONVERT = QName.createQName(URI, EmailDocumentsAction.PARAM_CONVERT);
@@ -82,6 +84,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         try {
             MimeMessage mimeMessage = mailService.createMimeMessage();
             mimeMessage.setFrom(new InternetAddress((String) action.getParameterValue(PARAM_FROM)));
+            mimeMessage.setRecipients(Message.RecipientType.BCC,(String) action.getParameterValue(PARAM_BCC));
             mimeMessage.setRecipients(Message.RecipientType.TO, (String) action.getParameterValue(PARAM_TO));
             mimeMessage.setSubject((String) action.getParameterValue(PARAM_SUBJECT));
             mimeMessage.setHeader("Content-Transfer-Encoding", "text/html; charset=UTF-8");
@@ -104,6 +107,7 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
     protected void addParameterDefinitions(List<ParameterDefinition> list) {
         list.add(new ParameterDefinitionImpl(PARAM_FROM, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PARAM_FROM)));
         list.add(new ParameterDefinitionImpl(PARAM_TO, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PARAM_TO)));
+        list.add(new ParameterDefinitionImpl(PARAM_BCC, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PARAM_BCC)));
         list.add(new ParameterDefinitionImpl(PARAM_SUBJECT, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PARAM_SUBJECT)));
         list.add(new ParameterDefinitionImpl(PARAM_BODY, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PARAM_BODY)));
         list.add(new ParameterDefinitionImpl(PARAM_CONVERT, DataTypeDefinition.BOOLEAN, true, getParamDisplayLabel(PARAM_CONVERT)));

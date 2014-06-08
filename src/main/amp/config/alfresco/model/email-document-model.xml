@@ -71,6 +71,9 @@
                 <property name="jb:subject">
                     <type>d:text</type>
                 </property>
+                <property name="jb:bcc">
+                    <type>d:text</type>
+                </property>
                 <property name="jb:body">
                     <type>d:text</type>
                 </property>
