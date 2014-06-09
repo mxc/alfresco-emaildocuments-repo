@@ -84,7 +84,9 @@ public class EmailDocumentsAction extends ActionExecuterAbstractBase {
         try {
             MimeMessage mimeMessage = mailService.createMimeMessage();
             mimeMessage.setFrom(new InternetAddress((String) action.getParameterValue(PARAM_FROM)));
-            mimeMessage.setRecipients(Message.RecipientType.BCC,(String) action.getParameterValue(PARAM_BCC));
+            if (action.getParameterValue(PARAM_BCC)!=null){
+                mimeMessage.setRecipients(Message.RecipientType.BCC,(String) action.getParameterValue(PARAM_BCC));
+            }
             mimeMessage.setRecipients(Message.RecipientType.TO, (String) action.getParameterValue(PARAM_TO));
             mimeMessage.setSubject((String) action.getParameterValue(PARAM_SUBJECT));
             mimeMessage.setHeader("Content-Transfer-Encoding", "text/html; charset=UTF-8");
