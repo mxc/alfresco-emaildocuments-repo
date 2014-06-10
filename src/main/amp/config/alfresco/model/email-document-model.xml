@@ -73,6 +73,7 @@
                 </property>
                 <property name="jb:bcc">
                     <type>d:text</type>
+                    <mandatory enforced="false">false</mandatory>
                 </property>
                 <property name="jb:body">
                     <type>d:text</type>
